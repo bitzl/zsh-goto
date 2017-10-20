@@ -1,16 +1,16 @@
 # goto.zsh
 
 function _awk {
-		which awk &>/dev/null && awk $@ || \
-		which gawk &>/dev/null && gawk $@
+    (which awk &>/dev/null && awk $@) || \
+  	(which gawk &>/dev/null && gawk $@)
 }
 
 function _gotofile {
-    echo $GOTO_FILE "$HOME/.labels.tsv" | _awk "{print \$1}"
+    echo ${GOTO_FILE} "$HOME/.labels.tsv" | _awk "{print \$1}"
 }
 
 function _makeLabel {
-    printf "%s %s\n" $1 $2 >> `_gotofile`
+    printf "%s %s\n" $1 $2 >> $(_gotofile)
 }
 
 function label {
@@ -33,16 +33,16 @@ function goto {
         echo "    jumps to a record set by label"
     elif [[ "$1" == "ls" ]]
     then
-        _awk "{ print \$1 }" `_gotofile` | column -t
+        _awk "{ print \$1 }" $(_gotofile) | column -t
     else
-        cd $(_awk "/^$1\s/ {print \$2;exit;}" `_gotofile`)
+        cd $(awk "/^$1\s/ {print \$2;exit;}" $(_gotofile))
     fi
 }
 
 function _goto {
-    for label in $(_awk '{print $1}' `_gotofile`)
+    for label in $(_awk '{print $1}' $(_gotofile))
     do
-        compadd "$@" $label
+        compadd "$@" ${label}
     done
 };
 
